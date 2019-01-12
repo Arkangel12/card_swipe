@@ -84,7 +84,7 @@ class OverlayBuilder extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _OverlayBuilderState createState() => new _OverlayBuilderState();
+  _OverlayBuilderState createState() => _OverlayBuilderState();
 }
 
 class _OverlayBuilderState extends State<OverlayBuilder> {
@@ -136,7 +136,8 @@ class _OverlayBuilderState extends State<OverlayBuilder> {
   }
 
   void addToOverlay(OverlayEntry entry) async {
-    Overlay.of(context).insert(entry);
+    final overlay = Overlay.of(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) => overlay.insert(entry));
   }
 
   void hideOverlay() {
@@ -155,7 +156,7 @@ class _OverlayBuilderState extends State<OverlayBuilder> {
   }
 
   void buildOverlay() async {
-    overlayEntry?.markNeedsBuild();
+    WidgetsBinding.instance.addPostFrameCallback((_) => overlayEntry?.markNeedsBuild());
   }
 
   @override
