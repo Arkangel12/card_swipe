@@ -1,9 +1,15 @@
 import 'package:card_swipe/AnchoredOverlay.dart';
 import 'package:card_swipe/cards.dart';
 import 'package:card_swipe/matches.dart';
+import 'package:card_swipe/profiles.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
+
+final MatchEngine matchEngine = new MatchEngine(
+    matches: demoProfile.map((Profiles profile) {
+  return DateMatch(profile: profile);
+}).toList());
 
 class MyApp extends StatelessWidget {
   @override
@@ -28,8 +34,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  DateMatch match = new DateMatch();
-
   Widget _buildAppBar() {
     return new AppBar(
       backgroundColor: Colors.transparent,
@@ -83,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icons.clear,
               iconColor: Colors.red,
               onPressed: () {
-                match.nope();
+                matchEngine.currentMatch.nope();
                 //matchEngine.currentMatch.nope();
               },
             ),
@@ -91,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icons.star,
               iconColor: Colors.blue,
               onPressed: () {
-                match.superLike();
+                matchEngine.currentMatch.superLike();
                 //matchEngine.currentMatch.superLike();
               },
             ),
@@ -99,7 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icons.favorite,
               iconColor: Colors.green,
               onPressed: () {
-                match.like();
+                matchEngine.currentMatch.like();
                 //matchEngine.currentMatch.like();
               },
             ),
@@ -120,9 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: _buildAppBar(),
-      body: DraggableCard(
-        match: match
-      ),
+      body: CardStack(matchEngine: matchEngine),
       bottomNavigationBar: _buildBottomBar(),
     );
   }
