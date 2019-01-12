@@ -84,7 +84,6 @@ class _PhotoBrowserState extends State<PhotoBrowser> {
           widget.photoAssetPaths[visiblePhotoIndex],
           fit: BoxFit.cover,
         ),
-//        photo indicator
         Positioned(
           left: 0,
           top: 0,

@@ -1,9 +1,15 @@
-import 'package:card_swipe/AnchoredOverlay.dart';
 import 'package:card_swipe/cards.dart';
 import 'package:card_swipe/matches.dart';
+import 'package:card_swipe/profile.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
+
+final MatchStack matchStack = new MatchStack(
+  matches: demoProfiles.map((Profile profile){
+    return DateMatch(profile: profile);
+  }).toList(),
+);
 
 class MyApp extends StatelessWidget {
   @override
@@ -28,8 +34,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  DateMatch match = new DateMatch();
-
   Widget _buildAppBar() {
     return new AppBar(
       backgroundColor: Colors.transparent,
@@ -83,24 +87,21 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icons.clear,
               iconColor: Colors.red,
               onPressed: () {
-                match.nope();
-                //matchEngine.currentMatch.nope();
+                matchStack.currentMatch.nope();
               },
             ),
             new RoundIconButton.small(
               icon: Icons.star,
               iconColor: Colors.blue,
               onPressed: () {
-                match.superLike();
-                //matchEngine.currentMatch.superLike();
+                matchStack.currentMatch.superLike();
               },
             ),
             new RoundIconButton.large(
               icon: Icons.favorite,
               iconColor: Colors.green,
               onPressed: () {
-                match.like();
-                //matchEngine.currentMatch.like();
+               matchStack.currentMatch.like();
               },
             ),
             new RoundIconButton.small(
@@ -120,8 +121,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: _buildAppBar(),
-      body: DraggableCard(
-        match: match
+      body: CardStack(
+        matchStack: matchStack
       ),
       bottomNavigationBar: _buildBottomBar(),
     );
