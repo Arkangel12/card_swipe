@@ -184,21 +184,27 @@ class _DraggableCardState extends State<DraggableCard>
   void initState() {
     super.initState();
 
-    slideBackAnimation = AnimationController(
-      vsync: this,
+    slideBackAnimation = new AnimationController(
       duration: const Duration(milliseconds: 1000),
+      vsync: this,
     )
       ..addListener(() => setState(() {
-            cardOffset = Offset.lerp(
-              slideBackStart,
-              const Offset(0, 0),
-              Curves.elasticOut.transform(slideBackAnimation.value),
-            );
+        cardOffset = Offset.lerp(
+          slideBackStart,
+          const Offset(0.0, 0.0),
+          Curves.elasticOut.transform(slideBackAnimation.value),
+        );
 
-            if (null != widget.onSlideUpdate) {
-              widget.onSlideUpdate(cardOffset.distance);
-            }
-          }))
+        print("draggable ${widget.isDraggable}");
+
+        if (null != widget.onSlideUpdate) {
+          widget.onSlideUpdate(cardOffset.distance);
+        }
+
+//        if (null != widget.onSlideRegionUpdate) {
+//          widget.onSlideRegionUpdate(slideRegion);
+//        }
+      }))
       ..addStatusListener((AnimationStatus status) {
         if (status == AnimationStatus.completed) {
           setState(() {
@@ -210,7 +216,7 @@ class _DraggableCardState extends State<DraggableCard>
       });
 
     slideOutAnimation = new AnimationController(
-      duration: Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     )
       ..addListener(() {
@@ -220,6 +226,10 @@ class _DraggableCardState extends State<DraggableCard>
           if (null != widget.onSlideUpdate) {
             widget.onSlideUpdate(cardOffset.distance);
           }
+
+//          if (null != widget.onSlideRegionUpdate) {
+//            widget.onSlideRegionUpdate(slideRegion);
+//          }
         });
       })
       ..addStatusListener((AnimationStatus status) {
@@ -235,6 +245,58 @@ class _DraggableCardState extends State<DraggableCard>
           });
         }
       });
+
+//    slideBackAnimation = AnimationController(
+//      vsync: this,
+//      duration: const Duration(milliseconds: 1000),
+//    )
+//      ..addListener(() => setState(() {
+//            cardOffset = Offset.lerp(
+//              slideBackStart,
+//              const Offset(0, 0),
+//              Curves.elasticOut.transform(slideBackAnimation.value),
+//            );
+//
+//            if (null != widget.onSlideUpdate) {
+//              widget.onSlideUpdate(cardOffset.distance);
+//            }
+//          }))
+//      ..addStatusListener((AnimationStatus status) {
+//        if (status == AnimationStatus.completed) {
+//          setState(() {
+//            dragStart = null;
+//            slideBackStart = null;
+//            dragPosition = null;
+//          });
+//        }
+//      });
+//
+//    slideOutAnimation = new AnimationController(
+//      duration: Duration(milliseconds: 500),
+//      vsync: this,
+//    )
+//      ..addListener(() {
+//        setState(() {
+//          cardOffset = slideOutTween.evaluate(slideOutAnimation);
+//
+//          if (null != widget.onSlideUpdate) {
+//            widget.onSlideUpdate(cardOffset.distance);
+//          }
+//        });
+//      })
+//      ..addStatusListener((AnimationStatus status) {
+//        if (status == AnimationStatus.completed) {
+//          setState(() {
+//            dragStart = null;
+//            dragPosition = null;
+//            slideOutTween = null;
+//
+//            if (widget.onSlideOutComplete != null) {
+//              widget.onSlideOutComplete(slideOutDirection);
+//            }
+//          });
+//        }
+//      });
   }
 
   @override
@@ -316,9 +378,9 @@ class _DraggableCardState extends State<DraggableCard>
       slideBackAnimation.stop(canceled: true);
     }
   }
-
   void _onPanUpdate(DragUpdateDetails details) {
     setState(() {
+
       dragPosition = details.globalPosition;
       cardOffset = dragPosition - dragStart;
 
@@ -331,28 +393,29 @@ class _DraggableCardState extends State<DraggableCard>
   void _onPanEnd(DragEndDetails details) {
     final dragVector = cardOffset / cardOffset.distance;
 
-    final isInLeftRegion = (cardOffset.dx / context.size.width) < -0.40;
-    final isInRightRegion = (cardOffset.dx / context.size.width) > 0.40;
-    final isInTopRegion = (cardOffset.dy / context.size.height) > -0.40;
+    final isInLeftRegion = (cardOffset.dx / context.size.width) < -0.45;
+    final isInRightRegion = (cardOffset.dx / context.size.width) > 0.45;
+    final isInTopRegion = (cardOffset.dy / context.size.height) < -0.40;
 
     setState(() {
       if (isInLeftRegion || isInRightRegion) {
-        slideOutTween = Tween(
-            begin: cardOffset, end: (dragVector * (2 * context.size.width)));
-        slideOutAnimation.forward(from: 0);
+        slideOutTween = new Tween(
+            begin: cardOffset, end: dragVector * (2 * context.size.width));
+        slideOutAnimation.forward(from: 0.0);
 
         slideOutDirection =
-            isInLeftRegion ? SlideDirection.left : SlideDirection.right;
+        isInLeftRegion ? SlideDirection.left : SlideDirection.right;
       } else if (isInTopRegion) {
-        slideOutTween = Tween(
-            begin: cardOffset, end: (dragVector * (2 * context.size.height)));
-        slideOutAnimation.forward(from: 0);
+        slideOutTween = new Tween(
+            begin: cardOffset, end: dragVector * (2 * context.size.height));
+        slideOutAnimation.forward(from: 0.0);
 
         slideOutDirection = SlideDirection.up;
       } else {
         slideBackStart = cardOffset;
-        slideBackAnimation.forward(from: 0);
+        slideBackAnimation.forward(from: 0.0);
       }
+
     });
   }
 
