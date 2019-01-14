@@ -5,6 +5,13 @@ import 'package:card_swipe/photos.dart';
 import 'package:card_swipe/profiles.dart';
 import 'package:flutter/material.dart';
 
+
+enum SlideDirection {
+  left,
+  right,
+  up,
+}
+
 class CardStack extends StatefulWidget {
   final MatchEngine matchEngine;
 
@@ -140,12 +147,6 @@ class _CardStackState extends State<CardStack> {
   }
 }
 
-enum SlideDirection {
-  left,
-  right,
-  up,
-}
-
 class DraggableCard extends StatefulWidget {
   final Widget card;
   final bool isDraggable;
@@ -182,9 +183,10 @@ class _DraggableCardState extends State<DraggableCard>
   @override
   void initState() {
     super.initState();
+
     slideBackAnimation = AnimationController(
       vsync: this,
-      duration: const Duration(microseconds: 1000),
+      duration: const Duration(milliseconds: 1000),
     )
       ..addListener(() => setState(() {
             cardOffset = Offset.lerp(
@@ -208,8 +210,8 @@ class _DraggableCardState extends State<DraggableCard>
       });
 
     slideOutAnimation = new AnimationController(
-      vsync: this,
       duration: Duration(milliseconds: 500),
+      vsync: this,
     )
       ..addListener(() {
         setState(() {
