@@ -83,8 +83,8 @@ class _CardStackState extends State<CardStack> {
     );
   }
 
-  SlideDirection _desiredSlideOutDirection(){
-    switch (widget.matchEngine.currentMatch.decision){
+  SlideDirection _desiredSlideOutDirection() {
+    switch (widget.matchEngine.currentMatch.decision) {
       case Decision.nope:
         return SlideDirection.left;
       case Decision.like:
@@ -105,7 +105,7 @@ class _CardStackState extends State<CardStack> {
   void _onSlideOutComplete(SlideDirection direction) {
     DateMatch currentMatch = widget.matchEngine.currentMatch;
 
-    switch (direction){
+    switch (direction) {
       case SlideDirection.left:
         currentMatch.nope();
         break;
@@ -122,14 +122,13 @@ class _CardStackState extends State<CardStack> {
 
   @override
   Widget build(BuildContext context) {
-    print('Desired Direction ${_desiredSlideOutDirection()}');
+    //print('Desired Direction ${_desiredSlideOutDirection()}');
     return Stack(
       children: <Widget>[
-        DraggableCard(card: _buildBackCard(), isDraggable: true
-            //slideTo
-            //onSlideUpdate
-            //onSlideOutComplete
-            ),
+        DraggableCard(
+          card: _buildBackCard(),
+          isDraggable: false,
+        ),
         DraggableCard(
           card: _buildFrontCard(),
           slideTo: _desiredSlideOutDirection(),
@@ -240,6 +239,10 @@ class _DraggableCardState extends State<DraggableCard>
   void didUpdateWidget(DraggableCard oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    if(widget.card.key != oldWidget.card.key){
+      cardOffset = const Offset(0, 0);
+    }
+
     if (oldWidget.slideTo == null && widget.slideTo != null) {
       switch (widget.slideTo) {
         case SlideDirection.left:
@@ -273,26 +276,35 @@ class _DraggableCardState extends State<DraggableCard>
   }
 
   void _slideLeft() async {
-    final screenWidth = context.size.width;
-    dragStart = _chooseRandomDragStart();
-    slideOutTween = Tween(begin: Offset(0, 0), end: Offset(2 * screenWidth, 0));
-    slideOutAnimation.forward(from: 0);
+    await Future.delayed(Duration(milliseconds: 1)).then((_) {
+      final screenWidth = context.size.width;
+      dragStart = _chooseRandomDragStart();
+      slideOutTween = new Tween(
+          begin: const Offset(0.0, 0.0),
+          end: new Offset(-2 * screenWidth, 0.0));
+      slideOutAnimation.forward(from: 0.0);
+    });
   }
 
   void _slideRight() async {
-    final screenWidth = context.size.width;
-    dragStart = _chooseRandomDragStart();
-    slideOutTween =
-        Tween(begin: Offset(0, 0), end: Offset(-2 * screenWidth, 0));
-    slideOutAnimation.forward(from: 0);
+    await Future.delayed(Duration(milliseconds: 1)).then((_) {
+      final screenWidth = context.size.width;
+      dragStart = _chooseRandomDragStart();
+      slideOutTween = new Tween(
+          begin: const Offset(0.0, 0.0), end: new Offset(2 * screenWidth, 0.0));
+      slideOutAnimation.forward(from: 0.0);
+    });
   }
 
   void _slideUp() async {
-    final screenHeight = context.size.height;
-    dragStart = _chooseRandomDragStart();
-    slideOutTween =
-        Tween(begin: Offset(0, 0), end: Offset(0, -2 * screenHeight));
-    slideOutAnimation.forward(from: 0);
+    await Future.delayed(Duration(milliseconds: 1)).then((_) {
+      final screenHeight = context.size.height;
+      dragStart = _chooseRandomDragStart();
+      slideOutTween = new Tween(
+          begin: const Offset(0.0, 0.0),
+          end: new Offset(0.0, -2 * screenHeight));
+      slideOutAnimation.forward(from: 0.0);
+    });
   }
 
   void _onPanStart(DragStartDetails details) {

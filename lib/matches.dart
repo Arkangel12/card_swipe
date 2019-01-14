@@ -15,7 +15,7 @@ class MatchEngine extends ChangeNotifier {
   DateMatch get nextMatch => _matches[_nextIndexMatch];
 
   void cycleMatch(){
-    if(currentMatch.decision == Decision.undecided){
+    if(currentMatch.decision != Decision.undecided){
       currentMatch.reset();
 
       _currentIndexMatch = _nextIndexMatch;
