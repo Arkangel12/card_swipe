@@ -15,8 +15,9 @@ class CardStack extends StatefulWidget {
 }
 
 class _CardStackState extends State<CardStack> {
+  Key _frontKey;
   DateMatch _currentMatch;
-  double _nextScaleMatch = 0.9;
+  double _nextCardScale = 0.9;
 
   @override
   void initState() {
@@ -25,6 +26,8 @@ class _CardStackState extends State<CardStack> {
 
     _currentMatch = widget.matchEngine.currentMatch;
     _currentMatch.addListener(_onMatchChange);
+
+    _frontKey = Key(_currentMatch.profile.name);
   }
 
   @override
@@ -55,6 +58,7 @@ class _CardStackState extends State<CardStack> {
       if (_currentMatch != null) _currentMatch.removeListener(_onMatchChange);
       _currentMatch = widget.matchEngine.currentMatch;
       if (_currentMatch != null) _currentMatch.addListener(_onMatchChange);
+      _frontKey = Key(_currentMatch.profile.name);
     });
   }
 
@@ -64,7 +68,7 @@ class _CardStackState extends State<CardStack> {
 
   Widget _buildBackCard() {
     return Transform(
-      transform: Matrix4.identity()..scale(_nextScaleMatch, _nextScaleMatch),
+      transform: Matrix4.identity()..scale(_nextCardScale, _nextCardScale),
       alignment: Alignment.center,
       child: ProfileCard(
         profiles: widget.matchEngine.nextMatch.profile,
@@ -74,12 +78,51 @@ class _CardStackState extends State<CardStack> {
 
   Widget _buildFrontCard() {
     return ProfileCard(
+      key: _frontKey,
       profiles: widget.matchEngine.currentMatch.profile,
     );
   }
 
+  SlideDirection _desiredSlideOutDirection(){
+    switch (widget.matchEngine.currentMatch.decision){
+      case Decision.nope:
+        return SlideDirection.left;
+      case Decision.like:
+        return SlideDirection.right;
+      case Decision.superLike:
+        return SlideDirection.up;
+      default:
+        return null;
+    }
+  }
+
+  void _onSlideUpdate(double distance) {
+    setState(() {
+      _nextCardScale = 0.9 + (0.1 * (distance / 100.0)).clamp(0.0, 0.1);
+    });
+  }
+
+  void _onSlideOutComplete(SlideDirection direction) {
+    DateMatch currentMatch = widget.matchEngine.currentMatch;
+
+    switch (direction){
+      case SlideDirection.left:
+        currentMatch.nope();
+        break;
+      case SlideDirection.right:
+        currentMatch.like();
+        break;
+      case SlideDirection.up:
+        currentMatch.superLike();
+        break;
+    }
+
+    widget.matchEngine.cycleMatch();
+  }
+
   @override
   Widget build(BuildContext context) {
+    print('Desired Direction ${_desiredSlideOutDirection()}');
     return Stack(
       children: <Widget>[
         DraggableCard(card: _buildBackCard(), isDraggable: true
@@ -89,16 +132,16 @@ class _CardStackState extends State<CardStack> {
             ),
         DraggableCard(
           card: _buildFrontCard(),
-          //slideTo
-          //onSlideUpdate
-          //onSlideOutComplete
+          slideTo: _desiredSlideOutDirection(),
+          onSlideUpdate: _onSlideUpdate,
+          onSlideOutComplete: _onSlideOutComplete,
         ),
       ],
     );
   }
 }
 
-enum SlideDirection{
+enum SlideDirection {
   left,
   right,
   up,
@@ -109,16 +152,16 @@ class DraggableCard extends StatefulWidget {
   final bool isDraggable;
   final SlideDirection slideTo;
   final Function(double distance) onSlideUpdate;
-  final Function(SlideDirection direction) onSlideOutCompleted;
+  final Function(SlideDirection direction) onSlideOutComplete;
 
-  const DraggableCard({
-    Key key,
-    this.card,
-    this.isDraggable = true,
-    this.slideTo,
-    this.onSlideUpdate,
-    this.onSlideOutCompleted
-  }) : super(key: key);
+  const DraggableCard(
+      {Key key,
+      this.card,
+      this.isDraggable = true,
+      this.slideTo,
+      this.onSlideUpdate,
+      this.onSlideOutComplete})
+      : super(key: key);
 
   @override
   _DraggableCardState createState() => _DraggableCardState();
@@ -151,7 +194,7 @@ class _DraggableCardState extends State<DraggableCard>
               Curves.elasticOut.transform(slideBackAnimation.value),
             );
 
-            if (null != widget.onSlideUpdate){
+            if (null != widget.onSlideUpdate) {
               widget.onSlideUpdate(cardOffset.distance);
             }
           }))
@@ -173,7 +216,7 @@ class _DraggableCardState extends State<DraggableCard>
         setState(() {
           cardOffset = slideOutTween.evaluate(slideOutAnimation);
 
-          if (null != widget.onSlideUpdate){
+          if (null != widget.onSlideUpdate) {
             widget.onSlideUpdate(cardOffset.distance);
           }
         });
@@ -185,10 +228,9 @@ class _DraggableCardState extends State<DraggableCard>
             dragPosition = null;
             slideOutTween = null;
 
-            if(widget.onSlideOutCompleted != null){
-              widget.onSlideOutCompleted(slideOutDirection);
+            if (widget.onSlideOutComplete != null) {
+              widget.onSlideOutComplete(slideOutDirection);
             }
-
           });
         }
       });
@@ -198,8 +240,8 @@ class _DraggableCardState extends State<DraggableCard>
   void didUpdateWidget(DraggableCard oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if(oldWidget.slideTo == null && widget.slideTo != null){
-      switch(widget.slideTo){
+    if (oldWidget.slideTo == null && widget.slideTo != null) {
+      switch (widget.slideTo) {
         case SlideDirection.left:
           _slideLeft();
           break;
@@ -230,14 +272,14 @@ class _DraggableCardState extends State<DraggableCard>
     return Offset(cardContext.size.width / 2 + cardTopLeft.dx, dragStartY);
   }
 
-  void _slideLeft() {
+  void _slideLeft() async {
     final screenWidth = context.size.width;
     dragStart = _chooseRandomDragStart();
     slideOutTween = Tween(begin: Offset(0, 0), end: Offset(2 * screenWidth, 0));
     slideOutAnimation.forward(from: 0);
   }
 
-  void _slideRight() {
+  void _slideRight() async {
     final screenWidth = context.size.width;
     dragStart = _chooseRandomDragStart();
     slideOutTween =
@@ -245,7 +287,7 @@ class _DraggableCardState extends State<DraggableCard>
     slideOutAnimation.forward(from: 0);
   }
 
-  void _slideUp() {
+  void _slideUp() async {
     final screenHeight = context.size.height;
     dragStart = _chooseRandomDragStart();
     slideOutTween =
@@ -266,7 +308,7 @@ class _DraggableCardState extends State<DraggableCard>
       dragPosition = details.globalPosition;
       cardOffset = dragPosition - dragStart;
 
-      if (null != widget.onSlideUpdate){
+      if (null != widget.onSlideUpdate) {
         widget.onSlideUpdate(cardOffset.distance);
       }
     });
@@ -285,7 +327,8 @@ class _DraggableCardState extends State<DraggableCard>
             begin: cardOffset, end: (dragVector * (2 * context.size.width)));
         slideOutAnimation.forward(from: 0);
 
-        slideOutDirection = isInLeftRegion ? SlideDirection.left : SlideDirection.right;
+        slideOutDirection =
+            isInLeftRegion ? SlideDirection.left : SlideDirection.right;
       } else if (isInTopRegion) {
         slideOutTween = Tween(
             begin: cardOffset, end: (dragVector * (2 * context.size.height)));
