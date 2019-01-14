@@ -195,15 +195,10 @@ class _DraggableCardState extends State<DraggableCard>
           Curves.elasticOut.transform(slideBackAnimation.value),
         );
 
-        print("draggable ${widget.isDraggable}");
-
         if (null != widget.onSlideUpdate) {
           widget.onSlideUpdate(cardOffset.distance);
         }
 
-//        if (null != widget.onSlideRegionUpdate) {
-//          widget.onSlideRegionUpdate(slideRegion);
-//        }
       }))
       ..addStatusListener((AnimationStatus status) {
         if (status == AnimationStatus.completed) {
