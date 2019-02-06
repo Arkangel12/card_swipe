@@ -120,15 +120,117 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  Widget _buildAnimatedBottomBar() {
+    return Container(
+      height: 70,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black26,
+              offset: Offset(-1, -1),
+              blurRadius: 3,
+              spreadRadius: 2),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          IconButton(icon: Icon(Icons.person), onPressed: () => print('Izq')),
+          TwoStateButton(),
+          IconButton(icon: Icon(Icons.chat), onPressed: () => print('Der')),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: _buildAppBar(),
       body: CardStack(matchEngine: matchEngine),
-      bottomNavigationBar: _buildBottomBar(),
+//      bottomNavigationBar: _buildBottomBar(),
+      bottomNavigationBar: _buildAnimatedBottomBar(),
     );
   }
 }
+
+//class DraggableButton extends StatefulWidget {
+//  @override
+//  _DraggableButtonState createState() => _DraggableButtonState();
+//}
+//
+//class _DraggableButtonState extends State<DraggableButton> {
+//  Alignment _alignment = Alignment.centerLeft;
+//
+//  @override
+//  Widget build(BuildContext context) {
+//    return Stack(
+//      children: <Widget>[
+//        Container(
+//          height: 45,
+//          width: 100,
+//          decoration: BoxDecoration(
+//            color: Colors.grey[200],
+//            borderRadius: BorderRadius.all(
+//              Radius.circular(30),
+//            ),
+//          ),
+//        ),
+//        AnimatedContainer(
+//          duration: Duration(milliseconds: 500),
+//          alignment: _alignment,
+//          height: 45,
+//          width: 60,
+//          decoration: BoxDecoration(
+//            color: Colors.white,
+//            borderRadius: BorderRadius.all(
+//              Radius.circular(30),
+//            ),
+//            border: Border.all(color: Colors.black12),
+//            boxShadow: [
+//              BoxShadow(
+//                color: Colors.black26,
+//                offset: Offset(0, 1),
+//                blurRadius: 1,
+//                spreadRadius: 1,
+//              )
+//            ],
+//          ),
+//          child: Container(height: 10, width: 10, color: Colors.red),
+//        ),
+//        Row(
+//          mainAxisSize: MainAxisSize.max,
+//          children: <Widget>[
+//            GestureDetector(
+//              onTap: () {
+//                print('Lado izq');
+//                setState(() {
+//                  _alignment = Alignment.centerLeft;
+//                });
+//              },
+//              child: Container(width: 50,),
+//            ),
+//            GestureDetector(
+//              onTap: () {
+//                print('Lado derecho');
+//                setState(() {
+//                  _alignment = Alignment.centerRight;
+//                });
+//              },
+//              child: Container(width: 50,),
+//            ),
+//          ],
+//        )
+//      ],
+//    );
+//  }
+//}
 
 class RoundIconButton extends StatelessWidget {
   final IconData icon;
@@ -178,6 +280,103 @@ class RoundIconButton extends StatelessWidget {
           color: iconColor,
         ),
         onPressed: onPressed,
+      ),
+    );
+  }
+}
+
+class TwoStateButton extends StatefulWidget {
+  @override
+  _TwoStateButtonState createState() => _TwoStateButtonState();
+}
+
+class _TwoStateButtonState extends State<TwoStateButton> {
+  Alignment _alignment = Alignment.centerLeft;
+
+  Widget _buildControls() {
+    return Stack(
+      fit: StackFit.expand,
+      children: <Widget>[
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _alignment = Alignment.centerLeft;
+            });
+          },
+          child: FractionallySizedBox(
+            widthFactor: 0.5,
+            heightFactor: 1.0,
+            alignment: Alignment.topLeft,
+            child: Container(
+              color: Colors.transparent,
+            ),
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _alignment = Alignment.centerRight;
+            });
+          },
+          child: FractionallySizedBox(
+            widthFactor: 0.5,
+            heightFactor: 1.0,
+            alignment: Alignment.topRight,
+            child: Container(
+              color: Colors.transparent,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 50,
+      width: 100,
+      child: Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          AnimatedContainer(
+            duration: Duration(milliseconds: 500),
+            alignment: _alignment,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.all(
+                Radius.circular(25),
+              ),
+            ),
+            child: SizedBox(
+              height: 50,
+              width: 60,
+              child: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    fit: BoxFit.fill,
+                    image: AssetImage('assets/stake_main.png'),
+                  ),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(25),
+                  ),
+                  border: Border.all(
+                    color: Colors.black38,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      spreadRadius: 1,
+                      blurRadius: 1,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          _buildControls(),
+        ],
       ),
     );
   }
